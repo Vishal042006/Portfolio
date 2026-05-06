@@ -111,7 +111,6 @@
     *,
     *::before,
     *::after {
-        animation: none !important;
       box-sizing: border-box;
       margin: 0;
       padding: 0
@@ -647,7 +646,7 @@
     .btn-solid:hover {
       background: var(--em2);
       transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba(14, 168, 121, .35)
+      box-shadow: 0 12px 32px rgba(14, 168, 121, .45), 0 0 20px rgba(14, 168, 121, .2)
     }
 
     .btn-border {
@@ -659,7 +658,8 @@
     .btn-border:hover {
       background: var(--em-g);
       border-color: var(--bdr2);
-      transform: translateY(-2px)
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(14, 168, 121, .18)
     }
 
     .btn-ghost {
@@ -686,9 +686,9 @@
     }
 
     .card:hover {
-      border-color: var(--bdr);
+      border-color: var(--bdr2);
       transform: translateY(-5px);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, .3), 0 0 40px rgba(14, 168, 121, .08)
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .35), 0 0 0 1px rgba(14, 168, 121, .12), 0 0 40px rgba(14, 168, 121, .18), 0 0 80px rgba(14, 168, 121, .07)
     }
 
     .card::before {
@@ -698,7 +698,7 @@
       left: 0;
       right: 0;
       height: 1px;
-      background: linear-gradient(90deg, transparent, var(--em-g), transparent);
+      background: linear-gradient(90deg, transparent, var(--em), var(--em3), transparent);
       opacity: 0;
       transition: opacity .35s
     }
@@ -1297,8 +1297,9 @@
     }
 
     .ab-cell:hover {
-      border-color: var(--bdr);
-      background: var(--em-gs)
+      border-color: var(--bdr2);
+      background: var(--em-gs);
+      box-shadow: 0 0 14px rgba(14, 168, 121, .12)
     }
 
     .ab-k {
@@ -1349,7 +1350,10 @@
     }
 
     .sk-card:hover .sk-ico {
-      transform: scale(1.12) rotate(-6deg)
+      transform: scale(1.12) rotate(-6deg);
+      background: var(--em-g);
+      border-color: var(--em);
+      box-shadow: 0 0 18px rgba(14, 168, 121, .35)
     }
 
     .sk-name {
@@ -1379,9 +1383,10 @@
 
     .sk-tag:hover {
       background: var(--em-gs);
-      border-color: var(--bdr);
+      border-color: var(--bdr2);
       color: var(--em3);
-      transform: scale(1.05)
+      transform: scale(1.05);
+      box-shadow: 0 0 10px rgba(14, 168, 121, .18)
     }
 
     /* ════════════════════════════════════════
@@ -1402,7 +1407,7 @@
 
     .feat-card:hover {
       border-color: var(--bdr2);
-      box-shadow: 0 0 80px rgba(14, 168, 121, .1)
+      box-shadow: 0 0 0 1px rgba(14, 168, 121, .1), 0 0 60px rgba(14, 168, 121, .22), 0 0 120px rgba(14, 168, 121, .08)
     }
 
     .feat-card::before {
@@ -1831,7 +1836,7 @@
     .pl-l:hover {
       background: var(--em2);
       transform: translateY(-1px);
-      box-shadow: 0 8px 20px rgba(14, 168, 121, .3)
+      box-shadow: 0 8px 24px rgba(14, 168, 121, .45), 0 0 20px rgba(14, 168, 121, .2)
     }
 
     .pl-g {
@@ -1968,7 +1973,8 @@
 
     .exp-tag:hover {
       background: var(--em-gs);
-      border-color: var(--bdr)
+      border-color: var(--bdr2);
+      box-shadow: 0 0 8px rgba(14, 168, 121, .15)
     }
 
     /* EDU */
@@ -2063,7 +2069,7 @@
       color: #fff;
       border-color: var(--em);
       transform: translateY(-1px);
-      box-shadow: 0 8px 20px rgba(14, 168, 121, .25)
+      box-shadow: 0 8px 24px rgba(14, 168, 121, .4), 0 0 20px rgba(14, 168, 121, .15)
     }
 
     .cert-secs {
@@ -2173,8 +2179,9 @@
     }
 
     .lead-item:hover {
-      border-color: var(--bdr);
-      transform: translateX(6px)
+      border-color: var(--bdr2);
+      transform: translateX(6px);
+      box-shadow: 0 0 24px rgba(14, 168, 121, .14), inset 0 0 20px rgba(14, 168, 121, .04)
     }
 
     .lead-ico {
@@ -2311,7 +2318,8 @@
     }
 
     .cc-card:hover {
-      transform: translateY(-6px)
+      transform: translateY(-6px);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, .3), 0 0 32px rgba(14, 168, 121, .2), 0 0 0 1px rgba(14, 168, 121, .1)
     }
 
     .cc-icon {
@@ -2622,7 +2630,7 @@
 .srv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
 .srv-card{padding:36px 30px;display:flex;flex-direction:column;align-items:flex-start}
 .srv-ico{width:56px;height:56px;background:var(--em-gs);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;border:1px solid var(--bdr);margin-bottom:24px;transition:transform .4s var(--ease)}
-.srv-card:hover .srv-ico{transform:translateY(-5px) scale(1.08) rotate(5deg);background:var(--em-g);border-color:var(--em)}
+.srv-card:hover .srv-ico{transform:translateY(-5px) scale(1.08) rotate(5deg);background:var(--em-g);border-color:var(--em);box-shadow:0 0 20px rgba(14,168,121,.3)}
 .srv-title{font-family:var(--ff-h);font-size:20px;font-weight:800;color:var(--txt);margin-bottom:12px;letter-spacing:-.5px}
 .srv-desc{font-size:14.5px;color:var(--txt2);line-height:1.7}
 
@@ -3768,6 +3776,75 @@
 
     window.toggleChat = toggleChat;
     window.sendChat = sendChat;
+
+    /* ══════════════════════════════════════════
+       PARALLAX ORBS
+    ══════════════════════════════════════════ */
+    window.addEventListener('scroll', () => {
+      const sy = scrollY * 0.15;
+      document.querySelectorAll('.orb-a').forEach(o => o.style.transform = `translateY(${sy * 0.3}px)`);
+      document.querySelectorAll('.orb-b').forEach(o => o.style.transform = `translateY(${-sy * 0.2}px)`);
+    }, { passive: true });
+
+    /* ══════════════════════════════════════════
+       STAGGER CHILDREN IN GRIDS
+    ══════════════════════════════════════════ */
+    document.querySelectorAll('.sk-grid, .cert-grid, .proj-row, .exp-grid, .contact-row, .ab-grid, .lead-list').forEach(grid => {
+      const children = [...grid.querySelectorAll('.sk-card, .cert-c, .pc, .exp-card, .cc-card, .ab-cell, .lead-item')];
+      children.forEach((child, i) => {
+        if (!child.style.transitionDelay || child.style.transitionDelay === '0s') {
+          child.style.transitionDelay = (i * 0.08) + 's';
+        }
+      });
+    });
+
+    /* ══════════════════════════════════════════
+       BUTTON RIPPLE
+    ══════════════════════════════════════════ */
+    document.querySelectorAll('.btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        const r = document.createElement('span');
+        const rect = this.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        r.style.cssText = `position:absolute;border-radius:50%;pointer-events:none;width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px;background:rgba(255,255,255,0.15);transform:scale(0);animation:ripple 0.5s ease-out forwards;`;
+        this.appendChild(r);
+        setTimeout(() => r.remove(), 500);
+      });
+    });
+
+    /* ══════════════════════════════════════════
+       ACTIVE NAV HIGHLIGHT
+    ══════════════════════════════════════════ */
+    const navLinks = document.querySelectorAll('.nav-menu a');
+    const secObs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          navLinks.forEach(a => a.classList.remove('active'));
+          const active = document.querySelector(`.nav-menu a[href="#${e.target.id}"]`);
+          if (active) active.classList.add('active');
+        }
+      });
+    }, { threshold: 0.4 });
+    document.querySelectorAll('section[id]').forEach(s => secObs.observe(s));
+
+    /* ══════════════════════════════════════════
+       CERT TOGGLE STAGGER
+    ══════════════════════════════════════════ */
+    const origCtogClick = document.getElementById('ctog').onclick;
+    document.getElementById('ctog').addEventListener('click', function() {
+      const cex = document.getElementById('cex');
+      if (cex.classList.contains('open')) {
+        cex.querySelectorAll('.cert-c').forEach((card, i) => {
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(12px)';
+          setTimeout(() => {
+            card.style.transition = 'opacity 0.4s, transform 0.4s';
+            card.style.opacity = '1';
+            card.style.transform = '';
+          }, i * 60);
+        });
+      }
+    });
     chatBubble.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
