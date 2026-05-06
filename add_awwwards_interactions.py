@@ -1,6 +1,6 @@
 import re
 
-file_path = "/Users/vishal/Downloads/portfolio/vishal_portfolio_ULTIMATE.html"
+file_path = "/Users/vishal/Downloads/portfolio/index.html"
 with open(file_path, "r") as f:
     content = f.read()
 
