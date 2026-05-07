@@ -773,90 +773,436 @@
 })();
 
 /* ══════════════════════════════════════════
-   SKILLS CAROUSEL
+   CORE EXPERTISE INTERACTIONS
 ══════════════════════════════════════════ */
-(function() {
+(function initServiceCards() {
+  const serviceCards = Array.from(document.querySelectorAll('#services .srv-card'));
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  if (!serviceCards.length || reduceMotion || !finePointer) return;
+
+  serviceCards.forEach((card) => {
+    card.addEventListener('pointermove', (event) => {
+      const rect = card.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / rect.width;
+      const y = (event.clientY - rect.top) / rect.height;
+      const rotateY = (x - .5) * 7;
+      const rotateX = (.5 - y) * 5;
+
+      card.style.setProperty('--mx', `${(x * 100).toFixed(1)}%`);
+      card.style.setProperty('--my', `${(y * 100).toFixed(1)}%`);
+      card.style.setProperty('--srv-ry', `${rotateY.toFixed(2)}deg`);
+      card.style.setProperty('--srv-rx', `${rotateX.toFixed(2)}deg`);
+    }, { passive: true });
+
+    card.addEventListener('pointerleave', () => {
+      card.style.setProperty('--mx', '50%');
+      card.style.setProperty('--my', '18%');
+      card.style.setProperty('--srv-ry', '0deg');
+      card.style.setProperty('--srv-rx', '0deg');
+    });
+  });
+})();
+
+/* ══════════════════════════════════════════
+   TECHNICAL ARSENAL CAROUSEL
+══════════════════════════════════════════ */
+(function initTechnicalArsenal() {
   const section = document.getElementById('skills');
-  const carousel = section?.querySelector('.skills-carousel');
-  const cards = Array.from(section?.querySelectorAll('.skill-card') || []);
+  const carousel = document.getElementById('skillsCarousel');
+  const originalCards = Array.from(section?.querySelectorAll('.skill-card') || []);
   const progressBar = section?.querySelector('.progress-bar');
 
-  if (!section || !carousel || !cards.length) return;
+  if (!section || !carousel || !originalCards.length) return;
+  if (carousel.dataset.arsenalReady === 'true') return;
+  carousel.dataset.arsenalReady = 'true';
 
-  let rafId = null;
-
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
-  const updateCardEffects = () => {
-    const scrollLeft = carousel.scrollLeft;
-    const containerWidth = carousel.clientWidth;
-    const centerX = containerWidth / 2;
-    const maxDistance = containerWidth * 0.72;
+  const beforeFragment = document.createDocumentFragment();
+  const afterFragment = document.createDocumentFragment();
+
+  originalCards.forEach((card) => {
+    const clone = card.cloneNode(true);
+    clone.setAttribute('aria-hidden', 'true');
+    clone.dataset.clone = 'before';
+    beforeFragment.appendChild(clone);
+  });
+
+  originalCards.forEach((card) => {
+    const clone = card.cloneNode(true);
+    clone.setAttribute('aria-hidden', 'true');
+    clone.dataset.clone = 'after';
+    afterFragment.appendChild(clone);
+  });
+
+  carousel.insertBefore(beforeFragment, carousel.firstChild);
+  carousel.appendChild(afterFragment);
+
+  const cards = Array.from(carousel.querySelectorAll('.skill-card'));
+  const middleCards = Array.from(carousel.querySelectorAll('.skill-card:not([data-clone])'));
+
+  let rafId = 0;
+  let autoRafId = 0;
+  let snapRafId = 0;
+  let lastAutoTime = 0;
+  let isDragging = false;
+  let isInteracting = false;
+  let sectionInView = false;
+  let userPauseUntil = 0;
+  let dragStartX = 0;
+  let dragStartScroll = 0;
+  let snapTimer = 0;
+  let interactionTimer = 0;
+  let resizeTimer = 0;
+  let activeIndex = -1;
+  let renderedActiveIndex = -1;
+  let loopSpan = 0;
+  let originalStart = 0;
+  let originalEnd = 0;
+  let isNormalizing = false;
+
+  const stopSnapAnimation = () => {
+    if (snapRafId) {
+      cancelAnimationFrame(snapRafId);
+      snapRafId = 0;
+    }
+  };
+
+  cards.forEach((card, cardIndex) => {
+    card.style.setProperty('--i', cardIndex);
+    card.querySelectorAll('.skill-tag').forEach((tag, tagIndex) => {
+      tag.style.setProperty('--tag-i', tagIndex);
+    });
+  });
+
+  function measureLoop() {
+    const firstMiddle = middleCards[0];
+    const lastMiddle = middleCards[middleCards.length - 1];
+    const firstAfter = carousel.querySelector('.skill-card[data-clone="after"]');
+
+    if (!firstMiddle || !lastMiddle || !firstAfter) return;
+
+    originalStart = firstMiddle.offsetLeft;
+    originalEnd = lastMiddle.offsetLeft + lastMiddle.offsetWidth;
+    loopSpan = firstAfter.offsetLeft - firstMiddle.offsetLeft;
+  }
+
+  function normalizeLoopPosition(force = false) {
+    if (!loopSpan || isNormalizing || (!force && (isDragging || isInteracting || snapRafId))) return;
+
+    const center = carousel.scrollLeft + carousel.clientWidth / 2;
+    let nextScroll = carousel.scrollLeft;
+
+    if (center < originalStart) {
+      nextScroll += loopSpan;
+    } else if (center > originalEnd) {
+      nextScroll -= loopSpan;
+    }
+
+    if (nextScroll !== carousel.scrollLeft) {
+      isNormalizing = true;
+      carousel.scrollLeft = nextScroll;
+      isNormalizing = false;
+    }
+  }
+
+  function pauseAutoplay(duration = 1600) {
+    userPauseUntil = performance.now() + duration;
+  }
+
+  function markInteraction(duration = 520) {
+    isInteracting = true;
+    pauseAutoplay(duration + 900);
+    window.clearTimeout(interactionTimer);
+    interactionTimer = window.setTimeout(() => {
+      isInteracting = false;
+    }, duration);
+  }
+
+  function canAutoplay() {
+    return !reduceMotion && sectionInView && !isDragging && !isInteracting && !snapRafId && performance.now() > userPauseUntil;
+  }
+
+  /* Continuous autoplay: one low-speed rAF loop, paused by hover, drag, touch, wheel, focus, and reduced motion. */
+  function runAutoplay(timestamp) {
+    if (!lastAutoTime) lastAutoTime = timestamp;
+    const delta = Math.min(timestamp - lastAutoTime, 34);
+    lastAutoTime = timestamp;
+    const autoplaying = canAutoplay();
+
+    carousel.classList.toggle('auto-playing', autoplaying);
+
+    if (autoplaying) {
+      carousel.scrollLeft += delta * 0.045;
+      normalizeLoopPosition(true);
+      scheduleUpdate();
+    }
+
+    autoRafId = requestAnimationFrame(runAutoplay);
+  }
+
+  function startAutoplay() {
+    if (!autoRafId && !reduceMotion) {
+      autoRafId = requestAnimationFrame(runAutoplay);
+    }
+  }
+
+  /* Center-distance engine: one rAF read/write pass controls scale, 3D rotation, blur, and active state. */
+  function updateCarousel() {
+    rafId = 0;
+
+    const rect = carousel.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const maxDistance = rect.width * 0.72;
+    let closestIndex = 0;
+    let closestDistance = Infinity;
 
     cards.forEach((card, index) => {
-      const cardCenter = card.offsetLeft - scrollLeft + card.offsetWidth / 2;
+      const cardRect = card.getBoundingClientRect();
+      const cardCenter = cardRect.left + cardRect.width / 2;
       const offset = cardCenter - centerX;
       const distance = Math.abs(offset);
       const ratio = clamp(1 - distance / maxDistance, 0, 1);
-      const scale = 0.92 + ratio * 0.16;
-      const rotateY = clamp((offset / maxDistance) * 12, -12, 12);
-      const translateY = -Math.pow(ratio, 1.8) * 16;
-      const opacity = 0.72 + ratio * 0.28;
-      const blur = clamp((1 - ratio) * 2.2, 0, 2.2);
-      const zIndex = Math.round(300 + ratio * 120);
+      const eased = ratio * ratio * (3 - 2 * ratio);
 
-      card.style.transform = `translateY(${translateY}px) rotateY(${rotateY}deg) scale(${scale})`;
-      card.style.opacity = opacity;
-      card.style.filter = `blur(${blur}px)`;
-      card.style.zIndex = zIndex;
-      card.classList.toggle('active', ratio > 0.68);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestIndex = index;
+      }
+
+      if (reduceMotion) {
+        card.style.setProperty('--active', ratio.toFixed(3));
+        card.style.setProperty('--scale', '1');
+        card.style.setProperty('--rx', '0deg');
+        card.style.setProperty('--ry', '0deg');
+        card.style.setProperty('--lift', '0px');
+        card.style.setProperty('--blur', '0px');
+        return;
+      }
+
+      const direction = clamp(offset / maxDistance, -1, 1);
+      const scale = 0.82 + eased * 0.22;
+      const rotateY = -direction * (11 - eased * 5);
+      const rotateX = (1 - eased) * 3.2;
+      const lift = -eased * 18;
+      const blur = finePointer ? (1 - eased) * 1.35 : 0;
+
+      card.style.setProperty('--active', eased.toFixed(3));
+      card.style.setProperty('--scale', scale.toFixed(4));
+      card.style.setProperty('--rx', `${rotateX.toFixed(3)}deg`);
+      card.style.setProperty('--ry', `${rotateY.toFixed(3)}deg`);
+      card.style.setProperty('--lift', `${lift.toFixed(2)}px`);
+      card.style.setProperty('--blur', `${blur.toFixed(2)}px`);
+      card.style.zIndex = String(Math.round(100 + eased * 100));
     });
 
-    if (progressBar) {
-      const maxScroll = carousel.scrollWidth - carousel.clientWidth;
-      const percentage = maxScroll > 0 ? (carousel.scrollLeft / maxScroll) * 100 : 0;
-      progressBar.style.width = `${percentage}%`;
-    }
-  };
+    const normalizedActiveIndex = closestIndex % originalCards.length;
 
-  const scheduleUpdate = () => {
-    if (rafId === null) {
-      rafId = requestAnimationFrame(() => {
-        rafId = null;
-        updateCardEffects();
+    if (normalizedActiveIndex !== activeIndex || closestIndex !== renderedActiveIndex) {
+      activeIndex = normalizedActiveIndex;
+      renderedActiveIndex = closestIndex;
+      cards.forEach((card, index) => {
+        const isActive = index === closestIndex;
+        card.classList.toggle('active', isActive);
+        card.setAttribute('aria-current', isActive && !card.dataset.clone ? 'true' : 'false');
       });
     }
-  };
 
-  const revealCards = () => {
-    cards.forEach((card, index) => {
-      window.setTimeout(() => card.classList.add('visible'), index * 90);
-    });
-  };
-
-  const handleWheel = (event) => {
-    if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
-      event.preventDefault();
-      carousel.scrollBy({ left: event.deltaY * 1.3, behavior: 'auto' });
+    if (progressBar) {
+      const center = carousel.scrollLeft + carousel.clientWidth / 2;
+      const progress = clamp((center - originalStart) / Math.max(originalEnd - originalStart, 1), 0, 1);
+      progressBar.style.transform = `scaleX(${progress})`;
+      progressBar.style.width = '100%';
     }
-  };
+  }
 
-  const handleResize = () => {
+  function scheduleUpdate() {
+    if (!rafId) rafId = requestAnimationFrame(updateCarousel);
+  }
+
+  /* Snap system: resolves to the closest card center after wheel/drag momentum settles. */
+  function snapToNearest() {
+    if (isDragging) return;
+    if (isInteracting) {
+      queueSnap();
+      return;
+    }
+
+    const center = carousel.scrollLeft + carousel.clientWidth / 2;
+    let target = carousel.scrollLeft;
+    let minDistance = Infinity;
+
+    cards.forEach((card) => {
+      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+      const distance = Math.abs(center - cardCenter);
+      if (distance < minDistance) {
+        minDistance = distance;
+        target = cardCenter - carousel.clientWidth / 2;
+      }
+    });
+
+    target = clamp(target, 0, carousel.scrollWidth - carousel.clientWidth);
+
+    if (reduceMotion) {
+      carousel.scrollLeft = target;
+      scheduleUpdate();
+      return;
+    }
+
+    stopSnapAnimation();
+
+    const start = carousel.scrollLeft;
+    const distance = target - start;
+    const duration = clamp(Math.abs(distance) * 1.8, 260, 620);
+    const startTime = performance.now();
+
+    function animateSnap(now) {
+      const t = clamp((now - startTime) / duration, 0, 1);
+      const eased = 1 - Math.pow(1 - t, 4);
+
+      carousel.scrollLeft = start + distance * eased;
+      scheduleUpdate();
+
+      if (t < 1) {
+        snapRafId = requestAnimationFrame(animateSnap);
+      } else {
+        snapRafId = 0;
+        normalizeLoopPosition(true);
+        scheduleUpdate();
+        pauseAutoplay(550);
+      }
+    }
+
+    snapRafId = requestAnimationFrame(animateSnap);
+  }
+
+  function queueSnap() {
+    if (canAutoplay() || snapRafId) return;
+    window.clearTimeout(snapTimer);
+    snapTimer = window.setTimeout(snapToNearest, 260);
+  }
+
+  carousel.addEventListener('scroll', () => {
     scheduleUpdate();
-  };
+    queueSnap();
+  }, { passive: true });
 
-  carousel.addEventListener('scroll', scheduleUpdate, { passive: true });
-  carousel.addEventListener('wheel', handleWheel, { passive: false });
-  window.addEventListener('resize', handleResize, { passive: true });
+  carousel.addEventListener('wheel', (event) => {
+    if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+    event.preventDefault();
+    stopSnapAnimation();
+    markInteraction(520);
+    carousel.scrollLeft += event.deltaY * 1.12;
+    scheduleUpdate();
+    queueSnap();
+  }, { passive: false });
+
+  carousel.addEventListener('focusin', () => {
+    pauseAutoplay(3000);
+  });
+
+  carousel.addEventListener('focusout', () => {
+    pauseAutoplay(900);
+  });
+
+  /* Pointer drag: native scroll position is the source of truth, so inertia and snap stay stable. */
+  carousel.addEventListener('pointerdown', (event) => {
+    if (event.button !== undefined && event.button !== 0) return;
+    stopSnapAnimation();
+    markInteraction(1200);
+    isDragging = true;
+    dragStartX = event.clientX;
+    dragStartScroll = carousel.scrollLeft;
+    carousel.classList.add('dragging');
+    carousel.setPointerCapture?.(event.pointerId);
+  });
+
+  carousel.addEventListener('pointermove', (event) => {
+    if (!isDragging) return;
+    event.preventDefault();
+    carousel.scrollLeft = dragStartScroll - (event.clientX - dragStartX) * 1.18;
+    markInteraction(360);
+    scheduleUpdate();
+  });
+
+  function endDrag(event) {
+    if (!isDragging) return;
+    isDragging = false;
+    carousel.classList.remove('dragging');
+    carousel.releasePointerCapture?.(event.pointerId);
+    markInteraction(680);
+    queueSnap();
+  }
+
+  carousel.addEventListener('pointerup', endDrag);
+  carousel.addEventListener('pointercancel', endDrag);
+  carousel.addEventListener('pointerleave', endDrag);
+
+  if (finePointer && !reduceMotion) {
+    cards.forEach((card) => {
+      /* Mouse parallax: only updates CSS variables, avoiding transform stacking conflicts. */
+      card.addEventListener('pointermove', (event) => {
+        const rect = card.getBoundingClientRect();
+        const x = (event.clientX - rect.left) / rect.width - .5;
+        const y = (event.clientY - rect.top) / rect.height - .5;
+
+        card.style.setProperty('--tilt-y', `${(x * 5.2).toFixed(2)}deg`);
+        card.style.setProperty('--tilt-x', `${(-y * 4.2).toFixed(2)}deg`);
+        card.style.setProperty('--glow-x', `${((x + .5) * 100).toFixed(1)}%`);
+        card.style.setProperty('--glow-y', `${((y + .5) * 100).toFixed(1)}%`);
+      }, { passive: true });
+
+      card.addEventListener('pointerleave', () => {
+        card.style.setProperty('--tilt-y', '0deg');
+        card.style.setProperty('--tilt-x', '0deg');
+        card.style.setProperty('--glow-x', '50%');
+        card.style.setProperty('--glow-y', '18%');
+      });
+    });
+  }
+
+  window.addEventListener('resize', () => {
+    window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(() => {
+      stopSnapAnimation();
+      measureLoop();
+      scheduleUpdate();
+      snapToNearest();
+    }, 120);
+  }, { passive: true });
 
   const observer = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting) {
+    sectionInView = Boolean(entries[0]?.isIntersecting);
+    if (sectionInView) {
       scheduleUpdate();
+      startAutoplay();
     }
-  }, { threshold: 0.2 });
+  }, { threshold: 0.16 });
 
   observer.observe(section);
 
-  revealCards();
+  function centerInitialCard() {
+    measureLoop();
+    const initialCard = middleCards[1] || middleCards[0];
+    if (!initialCard) return;
+
+    carousel.scrollLeft = initialCard.offsetLeft + initialCard.offsetWidth / 2 - carousel.clientWidth / 2;
+    scheduleUpdate();
+  }
+
+  window.addEventListener('load', () => {
+    centerInitialCard();
+    window.setTimeout(() => {
+      pauseAutoplay(600);
+      snapToNearest();
+    }, 80);
+  }, { once: true });
+
+  centerInitialCard();
   scheduleUpdate();
+  startAutoplay();
 })();
