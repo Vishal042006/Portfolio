@@ -101,7 +101,7 @@
     document.querySelectorAll('.rv,.rv-l,.rv-r,.rv-s').forEach(el => obs.observe(el));
 
     /* ── STAGGER GRID ITEMS ── */
-    document.querySelectorAll('.sk-grid,.srv-grid,.cert-grid,.proj-row,.exp-grid,.edu-wrap,.contact-row,.lead-list').forEach(grid => {
+    document.querySelectorAll('.srv-grid,.cert-grid,.proj-row,.exp-grid,.edu-wrap,.contact-row,.lead-list').forEach(grid => {
       [...grid.children].forEach((c, i) => {
         if (!c.style.transitionDelay) c.style.transitionDelay = (i * .07) + 's';
       });
@@ -309,8 +309,8 @@
     /* ══════════════════════════════════════════
        STAGGER CHILDREN IN GRIDS
     ══════════════════════════════════════════ */
-    document.querySelectorAll('.sk-grid, .cert-grid, .proj-row, .exp-grid, .contact-row, .ab-grid, .lead-list').forEach(grid => {
-      const children = [...grid.querySelectorAll('.sk-card, .cert-c, .pc, .exp-card, .cc-card, .ab-cell, .lead-item')];
+    document.querySelectorAll('.cert-grid, .proj-row, .exp-grid, .contact-row, .ab-grid, .lead-list').forEach(grid => {
+      const children = [...grid.querySelectorAll('.cert-c, .pc, .exp-card, .cc-card, .ab-cell, .lead-item')];
       children.forEach((child, i) => {
         if (!child.style.transitionDelay || child.style.transitionDelay === '0s') {
           child.style.transitionDelay = (i * 0.08) + 's';
@@ -612,3 +612,251 @@
       initParticles();
       animateParticles();
     });
+
+
+/* ═══════════════════════════════════════════════════════
+   CINEMATIC CODE WINDOW — typewriter animation
+═══════════════════════════════════════════════════════ */
+(function initCineTerminal() {
+  const codeBody = document.getElementById('cine-code-body');
+  const idleNote = document.getElementById('cine-idle-note');
+  if (!codeBody || !idleNote) return;
+
+  /* token definitions per line */
+  const CODE_LINES = [
+    [
+      { cls: 'cine-kw', text: 'const ' },
+      { cls: 'cine-va', text: 'vishal' },
+      { cls: 'cine-op', text: ' = ' },
+      { cls: 'cine-kw', text: 'new ' },
+      { cls: 'cine-va', text: 'Developer' },
+      { cls: 'cine-pn', text: '();' }
+    ],
+    [
+      { cls: 'cine-va', text: 'vishal' },
+      { cls: 'cine-pn', text: '.' },
+      { cls: 'cine-va', text: 'build' },
+      { cls: 'cine-pn', text: '(' },
+      { cls: 'cine-st', text: '"real-world products"' },
+      { cls: 'cine-pn', text: ');' }
+    ],
+    [
+      { cls: 'cine-va', text: 'vishal' },
+      { cls: 'cine-pn', text: '.' },
+      { cls: 'cine-va', text: 'optimize' },
+      { cls: 'cine-pn', text: '(' },
+      { cls: 'cine-st', text: '"performance + UX"' },
+      { cls: 'cine-pn', text: ');' }
+    ],
+    [
+      { cls: 'cine-va', text: 'vishal' },
+      { cls: 'cine-pn', text: '.' },
+      { cls: 'cine-va', text: 'ship' },
+      { cls: 'cine-pn', text: '(' },
+      { cls: 'cine-st', text: '"clean, scalable code"' },
+      { cls: 'cine-pn', text: ');' }
+    ],
+    [
+      { cls: 'cine-cm', text: '// from idea to production' }
+    ]
+  ];
+
+  const LINE_PAUSES = [300, 240, 240, 240, 0];
+
+  /* build DOM rows */
+  const lineEls = CODE_LINES.map((tokens, i) => {
+    const row = document.createElement('div');
+    row.className = 'cine-code-line' + (i === CODE_LINES.length - 1 ? ' cine-comment-line' : '');
+
+    const glow = document.createElement('div');
+    glow.className = 'cine-line-glow';
+    row.appendChild(glow);
+
+    const ln = document.createElement('span');
+    ln.className = 'cine-ln';
+    ln.textContent = i + 1;
+    row.appendChild(ln);
+
+    const ct = document.createElement('span');
+    ct.className = 'cine-code-text';
+    row.appendChild(ct);
+
+    codeBody.insertBefore(row, idleNote);
+    return { row, ct, tokens };
+  });
+
+  /* cursor */
+  const cur = document.createElement('span');
+  cur.id = 'cine-cursor';
+  codeBody.appendChild(cur);
+
+  /* helpers */
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  function flattenTokens(tokens) {
+    const out = [];
+    for (const tok of tokens)
+      for (const ch of tok.text)
+        out.push({ ch, cls: tok.cls });
+    return out;
+  }
+
+  function renderChars(ct, chars) {
+    ct.innerHTML = '';
+    let i = 0;
+    while (i < chars.length) {
+      const cls = chars[i].cls;
+      const span = document.createElement('span');
+      span.className = cls;
+      let txt = '';
+      while (i < chars.length && chars[i].cls === cls) { txt += chars[i].ch; i++; }
+      span.textContent = txt;
+      ct.appendChild(span);
+    }
+  }
+
+  function charDelay(ch) {
+    const base = 50;
+    if ('();'.includes(ch)) return base + Math.random() * 28;
+    if (ch === '"')          return base + Math.random() * 18;
+    if (ch === ' ')          return base * 0.55 + Math.random() * 12;
+    return base + (Math.random() - 0.3) * 26;
+  }
+
+  /* main animation — only runs when section scrolls into view */
+  let started = false;
+
+  async function runTyping() {
+    await sleep(500);
+    for (let li = 0; li < lineEls.length; li++) {
+      const { row, ct, tokens } = lineEls[li];
+      const chars = flattenTokens(tokens);
+
+      row.classList.add('cine-active');
+      ct.appendChild(cur);
+      cur.classList.add('typing');
+
+      const typed = [];
+      for (let ci = 0; ci < chars.length; ci++) {
+        typed.push(chars[ci]);
+        renderChars(ct, typed);
+        ct.appendChild(cur);
+        await sleep(charDelay(chars[ci].ch));
+      }
+
+      cur.classList.remove('typing');
+      await sleep(LINE_PAUSES[li] + 160);
+      row.classList.remove('cine-active');
+
+      if (li < lineEls.length - 1) {
+        cur.classList.add('typing');
+        await sleep(110);
+      }
+    }
+
+    cur.classList.remove('typing');
+    lineEls[lineEls.length - 1].ct.appendChild(cur);
+    await sleep(1000);
+    idleNote.classList.add('show');
+  }
+
+  /* trigger when the terminal scrolls into view */
+  const trigger = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting && !started) {
+      started = true;
+      trigger.disconnect();
+      runTyping();
+    }
+  }, { threshold: 0.35 });
+
+  trigger.observe(codeBody);
+})();
+
+/* ══════════════════════════════════════════
+   SKILLS CAROUSEL
+══════════════════════════════════════════ */
+(function() {
+  const section = document.getElementById('skills');
+  const carousel = section?.querySelector('.skills-carousel');
+  const cards = Array.from(section?.querySelectorAll('.skill-card') || []);
+  const progressBar = section?.querySelector('.progress-bar');
+
+  if (!section || !carousel || !cards.length) return;
+
+  let rafId = null;
+
+  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+  const updateCardEffects = () => {
+    const scrollLeft = carousel.scrollLeft;
+    const containerWidth = carousel.clientWidth;
+    const centerX = containerWidth / 2;
+    const maxDistance = containerWidth * 0.72;
+
+    cards.forEach((card, index) => {
+      const cardCenter = card.offsetLeft - scrollLeft + card.offsetWidth / 2;
+      const offset = cardCenter - centerX;
+      const distance = Math.abs(offset);
+      const ratio = clamp(1 - distance / maxDistance, 0, 1);
+      const scale = 0.92 + ratio * 0.16;
+      const rotateY = clamp((offset / maxDistance) * 12, -12, 12);
+      const translateY = -Math.pow(ratio, 1.8) * 16;
+      const opacity = 0.72 + ratio * 0.28;
+      const blur = clamp((1 - ratio) * 2.2, 0, 2.2);
+      const zIndex = Math.round(300 + ratio * 120);
+
+      card.style.transform = `translateY(${translateY}px) rotateY(${rotateY}deg) scale(${scale})`;
+      card.style.opacity = opacity;
+      card.style.filter = `blur(${blur}px)`;
+      card.style.zIndex = zIndex;
+      card.classList.toggle('active', ratio > 0.68);
+    });
+
+    if (progressBar) {
+      const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+      const percentage = maxScroll > 0 ? (carousel.scrollLeft / maxScroll) * 100 : 0;
+      progressBar.style.width = `${percentage}%`;
+    }
+  };
+
+  const scheduleUpdate = () => {
+    if (rafId === null) {
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        updateCardEffects();
+      });
+    }
+  };
+
+  const revealCards = () => {
+    cards.forEach((card, index) => {
+      window.setTimeout(() => card.classList.add('visible'), index * 90);
+    });
+  };
+
+  const handleWheel = (event) => {
+    if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+      event.preventDefault();
+      carousel.scrollBy({ left: event.deltaY * 1.3, behavior: 'auto' });
+    }
+  };
+
+  const handleResize = () => {
+    scheduleUpdate();
+  };
+
+  carousel.addEventListener('scroll', scheduleUpdate, { passive: true });
+  carousel.addEventListener('wheel', handleWheel, { passive: false });
+  window.addEventListener('resize', handleResize, { passive: true });
+
+  const observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) {
+      scheduleUpdate();
+    }
+  }, { threshold: 0.2 });
+
+  observer.observe(section);
+
+  revealCards();
+  scheduleUpdate();
+})();

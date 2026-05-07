@@ -182,16 +182,26 @@
   <section id="about">
     <div class="about-wrap">
       <div class="ab-img rv-l">
-        <div class="code-window card tilt" aria-label="Developer code terminal">
-          <div class="cw-header">
-            <span class="cw-dot r"></span><span class="cw-dot y"></span><span class="cw-dot g"></span>
+        <div class="cine-win-wrap">
+          <!-- left accent -->
+          <div class="cine-left-accent">
+            <div class="cine-ring"></div>
+            <div class="cine-ring cine-ring2"></div>
+            <div class="cine-ripple"></div>
+            <div class="cine-ripple cine-ripple2"></div>
+            <div class="cine-dot-c"></div>
           </div>
-          <div class="cw-body">
-            <div class="cw-line"><span class="cw-kw">const</span> <span class="cw-var">vishal</span> <span class="cw-op">=</span> <span class="cw-kw">new</span> <span class="cw-class">Developer</span>();</div>
-            <div class="cw-line"><span class="cw-var">vishal</span>.<span class="cw-fn">build</span>(<span class="cw-str">"real-world products"</span>);</div>
-            <div class="cw-line"><span class="cw-var">vishal</span>.<span class="cw-fn">optimize</span>(<span class="cw-str">"performance + UX"</span>);</div>
-            <div class="cw-line"><span class="cw-var">vishal</span>.<span class="cw-fn">ship</span>(<span class="cw-str">"clean, scalable code"</span>);<span class="cw-cursor">|</span></div>
-            <div class="cw-note">// from idea to production</div>
+          <!-- neon border -->
+          <div class="cine-win-glow"></div>
+          <!-- terminal -->
+          <div class="cine-terminal" aria-label="Developer code terminal">
+            <div class="cine-titlebar">
+              <span class="cw-dot r"></span><span class="cw-dot y"></span><span class="cw-dot g"></span>
+              <span class="cine-win-title">vishal<span>@dev</span> ~ portfolio</span>
+            </div>
+            <div class="cine-code-body" id="cine-code-body">
+              <div class="cine-idle-note" id="cine-idle-note">// idle — awaiting next commit</div>
+            </div>
           </div>
         </div>
         <div class="ab-badge"><span class="ab-n">2024</span><span class="ab-l">Journey Started</span></div>
@@ -237,49 +247,106 @@
 
   <!-- ════════════ SKILLS ════════════ -->
   <section id="skills">
+    <div class="skills-particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
     <div class="chip rv">Technical Arsenal</div>
     <h2 class="h1 rv">What I Build With</h2>
     <p class="sub rv">Full-stack from pixels to production — every layer covered.</p>
-    <div class="sk-grid">
-      <div class="card sk-card rv">
-        <div class="sk-ico">🎨</div>
-        <div class="sk-name">Frontend</div>
-        <div class="sk-tags"><span class="sk-tag">HTML5</span><span class="sk-tag">CSS3</span><span
-            class="sk-tag">JavaScript</span><span class="sk-tag">React.js</span><span class="sk-tag">Responsive
-            Design</span><span class="sk-tag">UI/UX</span></div>
+    <div class="skills-carousel-container">
+      <div class="skills-carousel">
+        <div class="skill-card" data-skill="frontend">
+          <div class="skill-card-inner">
+            <div class="skill-icon">🎨</div>
+            <div class="skill-name">Frontend</div>
+            <div class="skill-tags">
+              <span class="skill-tag">HTML5</span>
+              <span class="skill-tag">CSS3</span>
+              <span class="skill-tag">JavaScript</span>
+              <span class="skill-tag">React.js</span>
+              <span class="skill-tag">Responsive Design</span>
+              <span class="skill-tag">UI/UX</span>
+            </div>
+          </div>
+        </div>
+        <div class="skill-card" data-skill="backend">
+          <div class="skill-card-inner">
+            <div class="skill-icon">⚙️</div>
+            <div class="skill-name">Backend & APIs</div>
+            <div class="skill-tags">
+              <span class="skill-tag">Node.js</span>
+              <span class="skill-tag">Express.js</span>
+              <span class="skill-tag">REST APIs</span>
+              <span class="skill-tag">Firebase</span>
+              <span class="skill-tag">PHP</span>
+              <span class="skill-tag">SQL</span>
+            </div>
+          </div>
+        </div>
+        <div class="skill-card" data-skill="languages">
+          <div class="skill-card-inner">
+            <div class="skill-icon">💻</div>
+            <div class="skill-name">Languages</div>
+            <div class="skill-tags">
+              <span class="skill-tag">JavaScript</span>
+              <span class="skill-tag">Java</span>
+              <span class="skill-tag">C</span>
+              <span class="skill-tag">HTML/CSS</span>
+              <span class="skill-tag">SQL</span>
+            </div>
+          </div>
+        </div>
+        <div class="skill-card" data-skill="tools">
+          <div class="skill-card-inner">
+            <div class="skill-icon">🛠</div>
+            <div class="skill-name">Dev Tools</div>
+            <div class="skill-tags">
+              <span class="skill-tag">GitHub</span>
+              <span class="skill-tag">VS Code</span>
+              <span class="skill-tag">Firebase Firestore</span>
+              <span class="skill-tag">ExcelJS</span>
+              <span class="skill-tag">PDFKit</span>
+              <span class="skill-tag">Render</span>
+            </div>
+          </div>
+        </div>
+        <div class="skill-card" data-skill="design">
+          <div class="skill-card-inner">
+            <div class="skill-icon">🎭</div>
+            <div class="skill-name">UI/UX Design</div>
+            <div class="skill-tags">
+              <span class="skill-tag">Figma</span>
+              <span class="skill-tag">Wireframing</span>
+              <span class="skill-tag">Prototyping</span>
+              <span class="skill-tag">User Research</span>
+              <span class="skill-tag">Design Systems</span>
+            </div>
+          </div>
+        </div>
+        <div class="skill-card" data-skill="cs">
+          <div class="skill-card-inner">
+            <div class="skill-icon">🧠</div>
+            <div class="skill-name">Core CS</div>
+            <div class="skill-tags">
+              <span class="skill-tag">DSA</span>
+              <span class="skill-tag">OOP</span>
+              <span class="skill-tag">Problem Solving</span>
+              <span class="skill-tag">Agile</span>
+              <span class="skill-tag">Team Leadership</span>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="card sk-card rv">
-        <div class="sk-ico">⚙️</div>
-        <div class="sk-name">Backend & APIs</div>
-        <div class="sk-tags"><span class="sk-tag">Node.js</span><span class="sk-tag">Express.js</span><span
-            class="sk-tag">REST APIs</span><span class="sk-tag">Firebase</span><span class="sk-tag">PHP</span><span
-            class="sk-tag">SQL</span></div>
-      </div>
-      <div class="card sk-card rv">
-        <div class="sk-ico">💻</div>
-        <div class="sk-name">Languages</div>
-        <div class="sk-tags"><span class="sk-tag">JavaScript</span><span class="sk-tag">Java</span><span
-            class="sk-tag">C</span><span class="sk-tag">HTML/CSS</span><span class="sk-tag">SQL</span></div>
-      </div>
-      <div class="card sk-card rv">
-        <div class="sk-ico">🛠</div>
-        <div class="sk-name">Dev Tools</div>
-        <div class="sk-tags"><span class="sk-tag">GitHub</span><span class="sk-tag">VS Code</span><span
-            class="sk-tag">Firebase Firestore</span><span class="sk-tag">ExcelJS</span><span
-            class="sk-tag">PDFKit</span><span class="sk-tag">Render</span></div>
-      </div>
-      <div class="card sk-card rv">
-        <div class="sk-ico">🎭</div>
-        <div class="sk-name">UI/UX Design</div>
-        <div class="sk-tags"><span class="sk-tag">Figma</span><span class="sk-tag">Wireframing</span><span
-            class="sk-tag">Prototyping</span><span class="sk-tag">User Research</span><span class="sk-tag">Design
-            Systems</span></div>
-      </div>
-      <div class="card sk-card rv">
-        <div class="sk-ico">🧠</div>
-        <div class="sk-name">Core CS</div>
-        <div class="sk-tags"><span class="sk-tag">DSA</span><span class="sk-tag">OOP</span><span class="sk-tag">Problem
-            Solving</span><span class="sk-tag">Agile</span><span class="sk-tag">Team Leadership</span></div>
+      <div class="carousel-progress">
+        <div class="progress-bar"></div>
       </div>
     </div>
   </section>
