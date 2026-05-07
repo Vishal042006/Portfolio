@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vishal S — Cinematic Hero</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --teal:   #0EA879;
+    --teal2:  #10D4A0;
+    --teal3:  #4DEBB5;
+    --orange: #F0883E;
+    --blue:   #79C0FF;
+    --cyan:   #A5D6FF;
+    --green:  #6A9955;
+    --bg:     #020608;
+    --glass:  rgba(10, 22, 18, 0.72);
+    --border: rgba(14, 168, 121, 0.35);
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    overflow: hidden;
+    font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
+  }
+
+  /* ── SCENE ── */
+  #scene {
+    position: relative;
+    width: 100vw; height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+
+  /* ── BACKGROUND GRADIENT ── */
+  #bg-grad {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 70% 55% at 50% 50%, rgba(14,168,121,0.055) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 20% 80%, rgba(56,189,248,0.03) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 80% 20%, rgba(14,168,121,0.04) 0%, transparent 60%),
+      #020608;
+    animation: bgDrift 18s ease-in-out infinite alternate;
+  }
+  @keyframes bgDrift {
+    0%   { background-position: 0% 0%; }
+    100% { background-position: 3% 4%; }
+  }
+
+  /* ── GRID ── */
+  #grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(14,168,121,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(14,168,121,0.025) 1px, transparent 1px);
+    background-size: 52px 52px;
+    mask-image: radial-gradient(ellipse 85% 85% at 50% 50%, black 20%, transparent 100%);
+  }
+
+  /* ── PARTICLES ── */
+  #particles { position: absolute; inset: 0; pointer-events: none; }
+  .pt {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--teal);
+    animation: ptFloat var(--d) ease-in-out infinite;
+    animation-delay: var(--dl);
+    opacity: 0;
+  }
+  @keyframes ptFloat {
+    0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+    12%  { opacity: var(--op); }
+    88%  { opacity: var(--op); }
+    100% { transform: translateY(var(--ty)) translateX(var(--tx)) scale(0.3); opacity: 0; }
+  }
+
+  /* ── WINDOW WRAPPER (parallax) ── */
+  #win-wrap {
+    position: relative;
+    width: min(860px, 90vw);
+    animation: camDrift 12s ease-in-out infinite alternate;
+    transform-style: preserve-3d;
+  }
+  @keyframes camDrift {
+    0%   { transform: perspective(1200px) rotateX(0deg)   rotateY(0deg)   translateY(0px); }
+    33%  { transform: perspective(1200px) rotateX(0.6deg) rotateY(-0.8deg) translateY(-6px); }
+    66%  { transform: perspective(1200px) rotateX(-0.4deg) rotateY(0.6deg) translateY(3px); }
+    100% { transform: perspective(1200px) rotateX(0.3deg) rotateY(0.4deg) translateY(-4px); }
+  }
+
+  /* ── NEON BORDER GLOW ── */
+  #win-glow {
+    position: absolute;
+    inset: -2px;
+    border-radius: 18px;
+    background: transparent;
+    border: 1.5px solid var(--teal);
+    box-shadow:
+      0 0 18px rgba(14,168,121,0.5),
+      0 0 40px rgba(14,168,121,0.2),
+      0 0 80px rgba(14,168,121,0.08),
+      inset 0 0 30px rgba(14,168,121,0.04);
+    animation: borderBreathe 3.5s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 10;
+  }
+  @keyframes borderBreathe {
+    0%,100% {
+      box-shadow: 0 0 18px rgba(14,168,121,0.5), 0 0 40px rgba(14,168,121,0.2),
+                  0 0 80px rgba(14,168,121,0.08), inset 0 0 30px rgba(14,168,121,0.04);
+      border-color: rgba(14,168,121,0.35);
+    }
+    50% {
+      box-shadow: 0 0 28px rgba(14,168,121,0.75), 0 0 60px rgba(14,168,121,0.32),
+                  0 0 110px rgba(14,168,121,0.14), inset 0 0 40px rgba(14,168,121,0.07);
+      border-color: rgba(14,168,121,0.65);
+    }
+  }
+
+  /* ── TERMINAL WINDOW ── */
+  #terminal {
+    position: relative;
+    background: var(--glass);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    border-radius: 16px;
+    border: 1px solid rgba(14,168,121,0.18);
+    overflow: hidden;
+    box-shadow:
+      0 32px 80px rgba(0,0,0,0.7),
+      0 8px 24px rgba(0,0,0,0.5),
+      inset 0 1px 0 rgba(255,255,255,0.04);
+    animation: termFlicker 8s ease-in-out infinite;
+  }
+  @keyframes termFlicker {
+    0%,100% { opacity: 1; }
+    92%      { opacity: 1; }
+    92.5%    { opacity: 0.96; }
+    93%      { opacity: 1; }
+    96%      { opacity: 1; }
+    96.3%    { opacity: 0.97; }
+    96.6%    { opacity: 1; }
+  }
+
+  /* reflection sheen */
+  #terminal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 55%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.025) 0%, transparent 100%);
+    border-radius: 16px 16px 0 0;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ── TITLE BAR ── */
+  #titlebar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 20px;
+    background: rgba(4, 12, 10, 0.6);
+    border-bottom: 1px solid rgba(14,168,121,0.12);
+    position: relative; z-index: 2;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-r { background: #FF5F57; box-shadow: 0 0 6px rgba(255,95,87,0.5); }
+  .dot-y { background: #FFBD2E; box-shadow: 0 0 6px rgba(255,189,46,0.5); }
+  .dot-g { background: #28C840; box-shadow: 0 0 6px rgba(40,200,64,0.5); }
+  #win-title {
+    margin-left: 8px;
+    font-size: 12px;
+    color: rgba(14,168,121,0.6);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-family: 'DM Sans', sans-serif;
+  }
+  #win-title span { color: var(--teal2); }
+
+  /* ── CODE BODY ── */
+  #code-body {
+    padding: 28px 32px 32px;
+    min-height: 220px;
+    position: relative; z-index: 2;
+  }
+
+  /* ── LINE ── */
+  .code-line {
+    display: flex;
+    align-items: baseline;
+    gap: 0;
+    font-size: clamp(13px, 1.6vw, 16px);
+    line-height: 1.95;
+    min-height: 1.95em;
+    position: relative;
+    border-radius: 4px;
+    padding: 0 6px;
+    margin: 0 -6px;
+    transition: background 0.3s;
+  }
+  .code-line.active-line {
+    background: rgba(14,168,121,0.06);
+    box-shadow: inset 2px 0 0 var(--teal);
+  }
+  .ln {
+    width: 28px;
+    color: rgba(14,168,121,0.25);
+    font-size: 11px;
+    user-select: none;
+    flex-shrink: 0;
+    padding-top: 1px;
+  }
+  .code-text { flex: 1; white-space: pre; }
+
+  /* syntax colours */
+  .kw  { color: var(--orange); }
+  .va  { color: var(--blue); }
+  .st  { color: var(--cyan); }
+  .cm  { color: var(--green); font-style: italic; }
+  .op  { color: rgba(14,168,121,0.8); }
+  .pn  { color: rgba(235,244,240,0.55); }
+
+  /* ── CURSOR ── */
+  #cursor {
+    display: inline-block;
+    width: 2px; height: 1.1em;
+    background: var(--teal2);
+    vertical-align: text-bottom;
+    margin-left: 1px;
+    box-shadow: 0 0 8px var(--teal2), 0 0 16px rgba(14,168,121,0.4);
+    animation: cursorBlink 1.05s step-end infinite;
+  }
+  @keyframes cursorBlink {
+    0%,100% { opacity: 1; }
+    50%      { opacity: 0; }
+  }
+  #cursor.typing { animation: none; opacity: 1; }
+
+  /* ── BOTTOM BADGE ── */
+  #badge {
+    position: absolute;
+    bottom: -18px; right: 24px;
+    background: rgba(10,22,18,0.85);
+    border: 1px solid rgba(14,168,121,0.3);
+    border-radius: 30px;
+    padding: 7px 16px;
+    font-size: 11px;
+    color: var(--teal2);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(8px);
+    animation: badgePulse 2.8s ease-in-out infinite;
+    z-index: 20;
+    white-space: nowrap;
+  }
+  @keyframes badgePulse {
+    0%,100% { box-shadow: 0 0 8px rgba(14,168,121,0.25); border-color: rgba(14,168,121,0.3); }
+    50%     { box-shadow: 0 0 18px rgba(14,168,121,0.55), 0 0 32px rgba(14,168,121,0.15); border-color: rgba(14,168,121,0.6); }
+  }
+
+  /* ── LEFT ACCENT ── */
+  #left-accent {
+    position: absolute;
+    left: -52px; top: 50%;
+    transform: translateY(-50%);
+    width: 36px; height: 36px;
+  }
+  #left-accent .ring {
+    position: absolute; inset: 0;
+    border-radius: 50%;
+    border: 1.5px dashed rgba(14,168,121,0.3);
+    animation: ringRotate 18s linear infinite;
+  }
+  #left-accent .ring2 {
+    inset: 6px;
+    border: 1px dashed rgba(14,168,121,0.18);
+    animation: ringRotate 12s linear infinite reverse;
+  }
+  @keyframes ringRotate { to { transform: rotate(360deg); } }
+  #left-accent .dot-c {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 10px var(--teal), 0 0 20px rgba(14,168,121,0.4);
+    animation: dotPulse 2s ease-in-out infinite;
+  }
+  @keyframes dotPulse {
+    0%,100% { box-shadow: 0 0 10px var(--teal), 0 0 20px rgba(14,168,121,0.4); transform: translate(-50%,-50%) scale(1); }
+    50%     { box-shadow: 0 0 16px var(--teal2), 0 0 32px rgba(14,168,121,0.6); transform: translate(-50%,-50%) scale(1.2); }
+  }
+  #left-accent .ripple {
+    position: absolute; inset: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(14,168,121,0.4);
+    animation: rippleOut 2.4s ease-out infinite;
+  }
+  #left-accent .ripple2 { animation-delay: 1.2s; }
+  @keyframes rippleOut {
+    0%   { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(2.8); opacity: 0; }
+  }
+
+  /* ── ACTIVE LINE GLOW ── */
+  .line-glow {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    border-radius: 4px;
+    background: linear-gradient(90deg, rgba(14,168,121,0.08), transparent);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .code-line.active-line .line-glow { opacity: 1; }
+
+  /* ── COMMENT LINE ── */
+  .code-line.comment-line { opacity: 0.75; }
+
+  /* ── IDLE NOTE ── */
+  #idle-note {
+    position: absolute;
+    bottom: 10px; left: 32px;
+    font-size: 10px;
+    color: rgba(14,168,121,0.3);
+    letter-spacing: 1px;
+    font-family: 'DM Sans', sans-serif;
+    opacity: 0;
+    transition: opacity 1s;
+  }
+  #idle-note.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div id="scene">
+  <div id="bg-grad"></div>
+  <div id="grid"></div>
+  <div id="particles"></div>
+
+  <div id="win-wrap">
+    <!-- left accent -->
+    <div id="left-accent">
+      <div class="ring"></div>
+      <div class="ring ring2"></div>
+      <div class="ripple"></div>
+      <div class="ripple ripple2"></div>
+      <div class="dot-c"></div>
+    </div>
+
+    <!-- neon border -->
+    <div id="win-glow"></div>
+
+    <!-- terminal -->
+    <div id="terminal">
+      <div id="titlebar">
+        <div class="dot dot-r"></div>
+        <div class="dot dot-y"></div>
+        <div class="dot dot-g"></div>
+        <div id="win-title">vishal<span>@dev</span> ~ portfolio</div>
+      </div>
+      <div id="code-body">
+        <!-- lines injected by JS -->
+        <div id="idle-note">// idle — awaiting next commit</div>
+      </div>
+    </div>
+
+    <!-- badge -->
+    <div id="badge">⬡ 2024 Journey Started</div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   PARTICLES
+═══════════════════════════════════════ */
+(function spawnParticles() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 55; i++) {
+    const p = document.createElement('div');
+    p.className = 'pt';
+    const size = Math.random() * 2.5 + 0.8;
+    const tx = (Math.random() - 0.5) * 80;
+    const ty = -(Math.random() * 140 + 60);
+    const dur = (Math.random() * 10 + 8).toFixed(1);
+    const dl  = (Math.random() * 12).toFixed(1);
+    const op  = (Math.random() * 0.35 + 0.08).toFixed(2);
+    Object.assign(p.style, {
+      width: size + 'px', height: size + 'px',
+      left: Math.random() * 100 + '%',
+      top:  Math.random() * 100 + '%',
+      '--tx': tx + 'px', '--ty': ty + 'px',
+      '--d': dur + 's', '--dl': dl + 's', '--op': op,
+      filter: size > 2 ? 'blur(0.5px)' : 'none'
+    });
+    container.appendChild(p);
+  }
+})();
+
+/* ═══════════════════════════════════════
+   CODE DEFINITION
+═══════════════════════════════════════ */
+// Each line: array of {cls, text} tokens
+const CODE_LINES = [
+  [
+    { cls: 'kw', text: 'const ' },
+    { cls: 'va', text: 'vishal' },
+    { cls: 'op', text: ' = ' },
+    { cls: 'kw', text: 'new ' },
+    { cls: 'va', text: 'Developer' },
+    { cls: 'pn', text: '();' }
+  ],
+  [
+    { cls: 'va', text: 'vishal' },
+    { cls: 'pn', text: '.' },
+    { cls: 'va', text: 'build' },
+    { cls: 'pn', text: '(' },
+    { cls: 'st', text: '"real-world products"' },
+    { cls: 'pn', text: ');' }
+  ],
+  [
+    { cls: 'va', text: 'vishal' },
+    { cls: 'pn', text: '.' },
+    { cls: 'va', text: 'optimize' },
+    { cls: 'pn', text: '(' },
+    { cls: 'st', text: '"performance + UX"' },
+    { cls: 'pn', text: ');' }
+  ],
+  [
+    { cls: 'va', text: 'vishal' },
+    { cls: 'pn', text: '.' },
+    { cls: 'va', text: 'ship' },
+    { cls: 'pn', text: '(' },
+    { cls: 'st', text: '"clean, scalable code"' },
+    { cls: 'pn', text: ');' }
+  ],
+  [
+    { cls: 'cm', text: '// from idea to production' }
+  ]
+];
+
+const LINE_PAUSES = [320, 260, 260, 260, 0]; // ms pause after each line finishes
+
+/* ═══════════════════════════════════════
+   DOM SETUP
+═══════════════════════════════════════ */
+const codeBody = document.getElementById('code-body');
+const idleNote = document.getElementById('idle-note');
+
+// Build line elements (hidden initially)
+const lineEls = CODE_LINES.map((tokens, i) => {
+  const row = document.createElement('div');
+  row.className = 'code-line' + (i === CODE_LINES.length - 1 ? ' comment-line' : '');
+  row.dataset.index = i;
+
+  const glow = document.createElement('div');
+  glow.className = 'line-glow';
+  row.appendChild(glow);
+
+  const ln = document.createElement('span');
+  ln.className = 'ln';
+  ln.textContent = i + 1;
+  row.appendChild(ln);
+
+  const ct = document.createElement('span');
+  ct.className = 'code-text';
+  row.appendChild(ct);
+
+  codeBody.insertBefore(row, idleNote);
+  return { row, ct, tokens };
+});
+
+// Cursor element
+const cursorEl = document.createElement('span');
+cursorEl.id = 'cursor';
+codeBody.appendChild(cursorEl);
+
+/* ═══════════════════════════════════════
+   TYPING ENGINE
+═══════════════════════════════════════ */
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// Flatten tokens into characters with their class
+function flattenTokens(tokens) {
+  const chars = [];
+  for (const tok of tokens) {
+    for (const ch of tok.text) {
+      chars.push({ ch, cls: tok.cls });
+    }
+  }
+  return chars;
+}
+
+// Render typed chars into spans grouped by class
+function renderChars(ct, chars) {
+  ct.innerHTML = '';
+  let i = 0;
+  while (i < chars.length) {
+    const cls = chars[i].cls;
+    const span = document.createElement('span');
+    span.className = cls;
+    let txt = '';
+    while (i < chars.length && chars[i].cls === cls) {
+      txt += chars[i].ch;
+      i++;
+    }
+    span.textContent = txt;
+    ct.appendChild(span);
+  }
+}
+
+// Natural typing speed with micro-variations
+function charDelay(ch) {
+  const base = 52;
+  if (ch === '(' || ch === ')' || ch === ';') return base + Math.random() * 30;
+  if (ch === '"') return base + Math.random() * 20;
+  if (ch === ' ') return base * 0.6 + Math.random() * 15;
+  return base + (Math.random() - 0.3) * 28;
+}
+
+async function typeAnimation() {
+  // Initial pause — cursor blinks alone
+  await sleep(900);
+
+  for (let li = 0; li < lineEls.length; li++) {
+    const { row, ct, tokens } = lineEls[li];
+    const chars = flattenTokens(tokens);
+
+    // Activate line
+    row.classList.add('active-line');
+
+    // Move cursor into this line
+    ct.appendChild(cursorEl);
+    cursorEl.classList.add('typing');
+
+    const typed = [];
+
+    for (let ci = 0; ci < chars.length; ci++) {
+      typed.push(chars[ci]);
+      renderChars(ct, typed);
+      ct.appendChild(cursorEl);
+      await sleep(charDelay(chars[ci].ch));
+    }
+
+    // End of line — cursor blinks briefly
+    cursorEl.classList.remove('typing');
+    await sleep(LINE_PAUSES[li] + 180);
+
+    // Deactivate line
+    row.classList.remove('active-line');
+
+    // Move cursor to next line (or stay at end)
+    if (li < lineEls.length - 1) {
+      cursorEl.classList.add('typing');
+      await sleep(120);
+    }
+  }
+
+  // Final idle state
+  cursorEl.classList.remove('typing');
+  // Append cursor after last line text
+  const lastCt = lineEls[lineEls.length - 1].ct;
+  lastCt.appendChild(cursorEl);
+
+  await sleep(1200);
+  idleNote.classList.add('show');
+}
+
+// Kick off after a short delay
+setTimeout(typeAnimation, 600);
+</script>
+</body>
+</html>
